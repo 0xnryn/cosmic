@@ -33,7 +33,7 @@ let
       unrar
       gh
       jq
-      
+      pwgen
     ];
     
     programs.git = {
@@ -57,6 +57,8 @@ let
       vlc
       google-chrome
       discord
+      jdk17
+      orca-slicer
     ];
 
     home.activation.refreshKDEAppMenu = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

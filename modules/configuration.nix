@@ -59,7 +59,10 @@ let
       htop 
       pciutils 
       home-manager
-      cloudflare
+      cloudflared
+      sops
+      age
+      ssh-to-age
     ];
   };
 in
@@ -76,7 +79,7 @@ in
             efi.canTouchEfiVariables = true;
           };
         };
-        networking.hostName = "cosmoslaptop"; 
+        networking.hostName = "laptop"; 
       })
     ];
   };
