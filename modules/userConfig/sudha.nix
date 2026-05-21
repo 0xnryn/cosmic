@@ -1,6 +1,6 @@
-{ inputs, ... }:
-let
-  sudha_cli = { pkgs, lib, ... }:{
+{ inputs, lib, config, ... }:
+{
+  flake.homeModules.cli = { pkgs, ... }:{
     nixpkgs.config.allowUnfree = true;
     home.username = "sudha";
     home.homeDirectory = "/home/sudha";
@@ -45,13 +45,14 @@ let
     };
   };
   
-  sudha_gui = { pkgs, lib, ... }:{
+  flake.homeModules.gui = { pkgs, ... }:{
     home.packages = with pkgs; [
       telegram-desktop
       steam-run
       prusa-slicer
       libreoffice-fresh
-      vscode
+      # vscode
+      zed-editor
       unrar
       affine
       vlc
@@ -60,16 +61,5 @@ let
       jdk17
       orca-slicer
     ];
-
-    home.activation.refreshKDEAppMenu = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          /run/current-system/sw/bin/kbuildsycoca6 || true
-        '';
   };
-in
-{
-  configurations.home."sudha@cosmoslaptop" = {
-    pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;  
-    module = { imports = [ sudha_cli sudha_gui ]; };
-  };  
-  configurations.home."sudha@cosmos_server".module = sudha_cli;
 }

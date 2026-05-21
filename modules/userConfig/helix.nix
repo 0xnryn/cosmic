@@ -1,6 +1,6 @@
 { ... }:
-let
-  helix = { ... }:{
+{
+  flake.homeModules.helix = { ... }:{
     programs.helix = {
       enable = true;
       settings = {
@@ -10,7 +10,4 @@ let
       };
     };
   };
-in
-{
-  configurations.home."sudha@cosmoslaptop".module = helix;
 }

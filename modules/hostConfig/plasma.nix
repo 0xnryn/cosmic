@@ -1,6 +1,6 @@
-{ lib, ... }:
-let
-  plasma = { pkgs, ... }:
+{ ... }:
+{
+  flake.nixosModules.plasma = { pkgs, ... }:
   {
     services = {
       desktopManager.plasma6.enable = true;
@@ -35,11 +35,4 @@ let
       NIXOS_OZONE_WL = "1";
     };
   };
-
-  targetHosts = [ "cosmoslaptop" ];
-in
-{
-  configurations.nixos = lib.genAttrs targetHosts (name: {
-    module = plasma;
-  });
 }

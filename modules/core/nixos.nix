@@ -8,8 +8,16 @@
   options.configurations.nixos = lib.mkOption {
     type = lib.types.lazyAttrsOf (
       lib.types.submodule {
-        options.module = lib.mkOption {
-          type = lib.types.deferredModule;
+        options = {
+          # ADD THIS: Allow defining the architecture directly
+          system = lib.mkOption {
+            type = lib.types.str;
+            default = "x86_64-linux";
+            description = "The architecture for this host.";
+          };
+          module = lib.mkOption {
+            type = lib.types.deferredModule;
+          };
         };
       }
     );
@@ -17,7 +25,11 @@
 
   config.flake = {
     nixosConfigurations = lib.flip lib.mapAttrs config.configurations.nixos (
-      name: { module }: lib.nixosSystem { modules = [ module ]; }
+      # UPDATE THIS: Pass the 'system' down into the NixOS builder
+      name: { system, module }: lib.nixosSystem { 
+        inherit system; 
+        modules = [ module ]; 
+      }
     );
 
     checks =

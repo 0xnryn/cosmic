@@ -1,7 +1,6 @@
 { inputs, lib, ... }:
 {
-  # We push this entire hardware + disk definition into the cosmoslaptop bucket
-  configurations.nixos."cosmoslaptop".module = { config, modulesPath, ... }: {
+  flake.nixosModules.disko = { config, modulesPath, ... }: {
     # 1. DISKO LAYOUT (1GB EFI + Remaining EXT4)
     # This replaces the need for manual 'fileSystems' entries or UUIDs.
     disko.devices = {
@@ -36,21 +35,21 @@
         };
       };
     };
-
+  
     # 2. CORE HARDWARE DRIVERS
     # These ensure the kernel can actually talk to your NVMe and USB controllers.
     imports = [ 
       inputs.disko.nixosModules.disko
       (modulesPath + "/installer/scan/not-detected.nix") 
     ];
-
+  
     boot.initrd.availableKernelModules = [ 
       "nvme" "xhci_pci" "usb_storage" "usbhid" "sd_mod" 
     ];
     boot.initrd.kernelModules = [ ];
     boot.kernelModules = [ "kvm-amd" ];
     boot.extraModulePackages = [ ];
-
+  
     # 3. PLATFORM IDENTITY
     # This defines the architecture without hardcoding machine-specific IDs.
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

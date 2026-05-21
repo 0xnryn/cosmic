@@ -1,6 +1,7 @@
 { ... }:
-let
-  cosmos = { pkgs, ... }: {
+{
+  flake.nixosModules.configuration = { pkgs, ... }: {
+    
     nix.settings = {
       experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
       trusted-users = [ "root" "sudha" ];
@@ -11,11 +12,21 @@ let
     nixpkgs.config.allowUnfree = true;
     system.stateVersion = "25.11";
 
+    boot = {
+      binfmt.emulatedSystems = [ "aarch64-linux" ];
+      kernelPackages = pkgs.linuxPackages_latest;
+      loader = {
+        systemd-boot.enable = true;
+        efi.canTouchEfiVariables = true;
+      };
+    };
+
     hardware.bluetooth.enable = true;
 
     networking = {
       networkmanager.enable = true;
       firewall.enable = false;
+      hostName = "laptop";
     };
 
     time.timeZone = "Asia/Kolkata";
@@ -63,54 +74,6 @@ let
       sops
       age
       ssh-to-age
-    ];
-  };
-in
-{
-  configurations.nixos."cosmoslaptop".module = {
-    imports = [
-      cosmos
-      ({ pkgs, ... }: { 
-        boot = {
-          binfmt.emulatedSystems = [ "aarch64-linux" ];
-          kernelPackages = pkgs.linuxPackages_latest;
-          loader = {
-            systemd-boot.enable = true;
-            efi.canTouchEfiVariables = true;
-          };
-        };
-        networking.hostName = "laptop"; 
-      })
-    ];
-  };
-  
-  # Server-specific node definition
-  configurations.nixos."cosmosserver".module = {
-    imports = [
-      cosmos
-      ({ pkgs, ... }: { # 2. ADDED: Added 'config' to the arguments so it can be used below
-        boot = {
-          binfmt.emulatedSystems = [ "aarch64-linux" ];
-          kernelPackages = pkgs.linuxPackages_latest;
-          loader = {
-            grub = {
-              enable = true;
-              efiSupport = false; # Explicitly disabling EFI
-              # devices = [ "/dev/sda" ]; # <-- ADD THIS BACK: Tells GRUB to install to the MBR of the 500GB drive
-            };
-          };
-        };
-        networking.hostName = "cosmosserver"; 
-        services.avahi = {
-          enable = true;
-          nssmdns4 = true; # Allows software to use Avahi to resolve .local domains
-          publish = {
-            enable = true;
-            addresses = true;
-            workstation = true;
-          };
-        };
-      })
     ];
   };
 }

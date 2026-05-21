@@ -1,6 +1,6 @@
 { ... }:
 {
-  configurations.nixos."cosmoslaptop".module = { config, ... }: {
+  flake.nixosModules.nvidia = { config, ... }: {
     hardware.graphics.enable = true;
     hardware.graphics.enable32Bit = true;
 
@@ -30,21 +30,4 @@
       };
     };
   };
-
-#   configurations.nixos."cosmos-wsl".module = { pkgs, ... }: {
-#     # Let WSL pass through the Windows GPU driver into the container.
-#     wsl.useWindowsDriver = true;
-
-#     # OpenGL/Vulkan userspace libraries
-#     hardware.graphics.enable = true;
-
-#     # CUDA support via the stub library
-#     environment.systemPackages = with pkgs; [
-#       cudaPackages.cudatoolkit
-#     ];
-
-#     environment.sessionVariables = {
-#       LD_LIBRARY_PATH = "/usr/lib/wsl/lib:$LD_LIBRARY_PATH";
-#     };
-#   };
 }
