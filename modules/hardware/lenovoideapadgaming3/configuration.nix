@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.configuration = { pkgs, ... }: {
+  flake.nixosModules.lenovoideapadgaming3-config = { pkgs, ... }: {
     
     nix.settings = {
       experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
@@ -75,5 +75,8 @@
       age
       ssh-to-age
     ];
+
+
+    
   };
 }

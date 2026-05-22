@@ -1,6 +1,6 @@
 { inputs, lib, ... }:
 {
-  flake.nixosModules.disko = { config, modulesPath, ... }: {
+  flake.nixosModules.lenovoideapadgaming3-disko = { config, modulesPath, ... }: {
     # 1. DISKO LAYOUT (1GB EFI + Remaining EXT4)
     # This replaces the need for manual 'fileSystems' entries or UUIDs.
     disko.devices = {
@@ -55,4 +55,6 @@
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   };
+
+  
 }

@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.nvidia = { config, ... }: {
+  flake.nixosModules.lenovoideapadgaming3-nvidia = { config, ... }: {
     hardware.graphics.enable = true;
     hardware.graphics.enable32Bit = true;
 

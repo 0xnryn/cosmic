@@ -8,10 +8,9 @@ in
     "laptop" = {
       system = "x86_64-linux";
       module.imports = with m; [ 
-        configuration 
-        disko
-        plasma 
-        nvidia
+        lenovoideapadgaming3-config
+        lenovoideapadgaming3-disko
+        lenovoideapadgaming3-nvidia
         ollama_cuda
         openwebui 
       ];
