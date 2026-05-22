@@ -15,6 +15,18 @@ in
         openwebui 
         plasma
       ];
-    };    
+    };  
+  
+    "server" = {
+      system = "x86_64-linux";
+      module.imports = with m; [ 
+        lenovoideapadgaming3-config
+        lenovoideapadgaming3-disko
+        lenovoideapadgaming3-nvidia
+        ollama_cuda
+        openwebui 
+        plasma
+      ];
+    };  
   };
 }

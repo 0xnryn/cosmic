@@ -1,6 +1,10 @@
 { ... }:
 {
   flake.nixosModules.lenovoideapadgaming3-config = { pkgs, ... }: {
+    users.users.sudha = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" "dialout" "docker" ];
+    };
     
     nix.settings = {
       experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
@@ -32,12 +36,7 @@
     time.timeZone = "Asia/Kolkata";
     i18n.defaultLocale = "en_US.UTF-8";
     console.keyMap = "us";
-
-    users.users.sudha = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "docker" ];
-    };
-
+    
     services = {
       printing.enable = true;
       pipewire = {
