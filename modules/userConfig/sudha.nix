@@ -58,7 +58,7 @@
       vlc
       google-chrome
       discord
-      jdk17
+      jdk25
       orca-slicer
     ];
   };

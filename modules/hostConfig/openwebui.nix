@@ -14,7 +14,7 @@
         WEBUI_AUTH = "False";
 
         # 5. STT (Whisper) Hardware Acceleration
-        WHISPER_MODEL = "small.en";
+        WHISPER_MODEL = "base.en";
         WHISPER_LANGUAGE = "en";
         WHISPER_MULTILINGUAL = "False";
         
@@ -22,7 +22,7 @@
         WHISPER_DEVICE = "cuda";
         
         # CRITICAL: Compress to fit in the remaining 500MB of VRAM
-        WHISPER_COMPUTE_TYPE = "float32"; 
+        WHISPER_COMPUTE_TYPE = "int8"; 
       };
     };
   };

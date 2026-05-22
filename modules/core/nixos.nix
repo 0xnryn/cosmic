@@ -3,7 +3,7 @@
 # These configurations end up as flake outputs under `#nixosConfigurations."<name>"`.
 # A check for the toplevel derivation of each configuration also ends
 # under `#checks.<system>."configurations:nixos:<name>"`.
-{ lib, config, ... }:
+{ lib, config, inputs, ... }:
 {
   options.configurations.nixos = lib.mkOption {
     type = lib.types.lazyAttrsOf (
@@ -27,7 +27,8 @@
     nixosConfigurations = lib.flip lib.mapAttrs config.configurations.nixos (
       # UPDATE THIS: Pass the 'system' down into the NixOS builder
       name: { system, module }: lib.nixosSystem { 
-        inherit system; 
+        inherit system;
+        specialArgs = { inherit inputs; };
         modules = [ module ]; 
       }
     );
