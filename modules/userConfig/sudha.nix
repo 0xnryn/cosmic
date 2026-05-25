@@ -56,10 +56,10 @@
       unrar
       affine
       vlc
-      google-chrome
       discord
       jdk25
       orca-slicer
+      google-chrome
     ];
   };
 }
