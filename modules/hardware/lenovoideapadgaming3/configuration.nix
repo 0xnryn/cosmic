@@ -69,6 +69,8 @@
       sops
       age
       ssh-to-age
+      agenix-cli
+      age-plugin-tpm
     ];
   };
 }

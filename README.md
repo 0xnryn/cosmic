@@ -54,3 +54,11 @@ nixos-rebuild switch --flake .#cosmosserver --target-host sudha@192.168.29.105 -
 nixos-rebuild switch --flake .#cosmosserver --target-host sudha@cosmosserver --build-host localhost --sudo --ask-sudo-password
 
 sudo tailscale funnel --bg --https=443 localhost:8001
+
+
+ssh-keygen -t ed25519 -C ""
+
+[sudha@laptop:~/nixos-dendritic]$ nix run github:ryantm/agenix -- -e secrets/ssh.age
+
+
+nix run nixpkgs#mkpasswd -- -m sha-512

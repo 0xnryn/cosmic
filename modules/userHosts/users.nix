@@ -8,7 +8,6 @@ let
   };
 in
 {
-
   configurations.home = {
     "sudha@laptop" = with hm; mkUser "laptop" [
       cli
@@ -24,36 +23,40 @@ in
   };
 
   flake.nixosModules.system-users = { config, pkgs, ... }: {
-    imports = [ inputs.sops-nix.nixosModules.sops ];
+    
+    # ==========================================
+    # 1. THE AGENIX PASSWORD DECRYPTION
+    # ==========================================
+    # Unlike SOPS which uses one big YAML file, Agenix decrypts literal files.
+    # We point to the encrypted hashes in your secrets folder.
 
-    sops = {
-      age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-      # Adjust path: userHosts is 2 folders deep (modules/userHosts/)
-      defaultSopsFile = ../../secrets/passwords.yaml;
-      defaultSopsFormat = "yaml";
+    age.secrets."root-password" = {
+      file = ../../secrets/root-password.age;
     };
 
-    sops.secrets.root = {
-      neededForUsers = true;
+    age.secrets."sudha-password" = {
+      file = ../../secrets/sudha-password.age;
     };
 
-    # CRITICAL: neededForUsers must be true
-    sops.secrets.sudha = {
-      neededForUsers = true;
-    };
-
-    # Apply the SOPS passwords to the users
+    # ==========================================
+    # 2. APPLYING PASSWORDS TO USERS
+    # ==========================================
+    
     users.users.root = {
-      hashedPasswordFile = config.sops.secrets.root.path;
+      # Points to the decrypted file sitting in /run/agenix/root-password
+      hashedPasswordFile = config.age.secrets."root-password".path;
     };
 
     users.users.sudha = {
       isNormalUser = true;
       extraGroups = [ "wheel" "dialout" "docker" ];
-      hashedPasswordFile = config.sops.secrets.sudha.path;
+      hashedPasswordFile = config.age.secrets."sudha-password".path;
     };
 
-    # THE VM OVERRIDE: ONLY applies when running `nixos-rebuild build-vm`
+    # ==========================================
+    # 3. THE VM OVERRIDE
+    # ==========================================
+    # ONLY applies when running `nixos-rebuild build-vm`
     virtualisation.vmVariant = {
       users.users.root.hashedPasswordFile = pkgs.lib.mkForce null;
       users.users.sudha.hashedPasswordFile = pkgs.lib.mkForce null;
