@@ -13,7 +13,7 @@ in
         lenovoideapadgaming3-nvidia
         ollama_cuda
         openwebui 
-        plasma
+        gnome
       ];
     };  
   

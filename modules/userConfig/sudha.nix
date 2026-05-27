@@ -60,6 +60,7 @@
       jdk25
       orca-slicer
       google-chrome
+      arduino-ide
     ];
   };
 }

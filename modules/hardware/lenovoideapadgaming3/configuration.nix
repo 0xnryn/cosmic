@@ -1,10 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.lenovoideapadgaming3-config = { pkgs, ... }: {
-    users.users.sudha = {
-      isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "docker" ];
-    };
+  flake.nixosModules.lenovoideapadgaming3-config = { pkgs, config, inputs, ... }: {
     
     nix.settings = {
       experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
