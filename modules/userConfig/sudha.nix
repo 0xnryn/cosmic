@@ -1,6 +1,6 @@
 { inputs, lib, config, ... }:
 {
-  flake.homeModules.cli = { pkgs, ... }:{
+  flake.homeModules.sudhacli = { pkgs, osConfig, ... }:{
     nixpkgs.config.allowUnfree = true;
     home.username = "sudha";
     home.homeDirectory = "/home/sudha";
@@ -43,9 +43,22 @@
         email = "atalkarsudhanshu@proton.me";
       };
     };
+
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      settings = {
+        "*" = {
+          IdentityFile = osConfig.age.secrets."sshsudha".path;
+          # restore any defaults you want to keep
+          AddKeysToAgent = "yes";
+          ServerAliveInterval = 60;
+        };
+      };
+    };
   };
   
-  flake.homeModules.gui = { pkgs, ... }:{
+  flake.homeModules.sudhagui = { pkgs, ... }:{
     home.packages = with pkgs; [
       telegram-desktop
       steam-run

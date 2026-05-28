@@ -3,6 +3,7 @@ let
   mkUser = hostname: modules: {
     pkgs = inputs.nixpkgs.legacyPackages.${config.configurations.nixos.${hostname}.system};
     module = { imports = modules; };
+    osConfig = config.flake.nixosConfigurations.${hostname}.config;
   };
 in
 {
