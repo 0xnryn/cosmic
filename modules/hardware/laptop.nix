@@ -1,6 +1,19 @@
 { inputs, lib, ... }:
 {
   flake.nixosModules.laptop = { pkgs, config, modulesPath,... }: {
+
+    imports = [ 
+      inputs.disko.nixosModules.disko
+      (modulesPath + "/installer/scan/not-detected.nix") 
+    ];
+    
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+    networking = {
+      networkmanager.enable = true;
+      hostName = "laptop";
+    };
+    
     boot = {
       binfmt.emulatedSystems = [ "aarch64-linux" ];
       kernelPackages = pkgs.linuxPackages_latest;
@@ -8,15 +21,50 @@
         systemd-boot.enable = true;
         efi.canTouchEfiVariables = true;
       };
+      kernelParams = [
+        "nvidia.NVreg_PreserveVideoMemoryAllocations=0"
+      ];
+      initrd.availableKernelModules = [ 
+        "nvme" "xhci_pci" "usb_storage" "usbhid" "sd_mod" 
+      ];
+      initrd.kernelModules = [ ];
+      kernelModules = [ "kvm-amd" ];
+      extraModulePackages = [ ];
     };
 
-    hardware.bluetooth.enable = true;
+    services.xserver.videoDrivers = [ "amdgpu" "nvidia" ];
 
-    networking = {
-      networkmanager.enable = true;
-      firewall.enable = false;
-      hostName = "laptop";
+    hardware = {
+
+      bluetooth.enable = true;
+
+      cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+      
+      graphics = {
+        enable = true;
+        enable32Bit = true;
+      };
+      
+      nvidia = {
+        modesetting.enable = true;
+        open = true;
+        powerManagement.enable = true;
+        powerManagement.finegrained = true;
+        dynamicBoost.enable = true;
+        nvidiaSettings = true;
+        
+        # We have access to 'config' here because of the lambda signature above
+        package = config.boot.kernelPackages.nvidiaPackages.beta;
+
+        prime = {
+          offload.enable = true;
+          offload.enableOffloadCmd = true;
+          amdgpuBusId = "PCI:5:0:0";
+          nvidiaBusId = "PCI:1:0:0";
+        };
+      };
     };
+
 
     # 1. DISKO LAYOUT (1GB EFI + LUKS Encrypted EXT4)
     disko.devices = {
@@ -57,53 +105,6 @@
             };
           };
         };
-      };
-    };
-  
-    # 2. CORE HARDWARE DRIVERS
-    imports = [ 
-      inputs.disko.nixosModules.disko
-      (modulesPath + "/installer/scan/not-detected.nix") 
-    ];
-  
-    boot.initrd.availableKernelModules = [ 
-      "nvme" "xhci_pci" "usb_storage" "usbhid" "sd_mod" 
-    ];
-    boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ "kvm-amd" ];
-    boot.extraModulePackages = [ ];
-  
-    # 3. PLATFORM IDENTITY
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-    hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
-
-    hardware.graphics.enable = true;
-    hardware.graphics.enable32Bit = true;
-
-    boot.kernelParams = [
-      "nvidia.NVreg_PreserveVideoMemoryAllocations=0"
-    ];
-
-    # Load drivers for both AMD iGPU and NVIDIA dGPU
-    services.xserver.videoDrivers = [ "amdgpu" "nvidia" ];
-
-    hardware.nvidia = {
-      modesetting.enable = true;
-      open = true;
-      powerManagement.enable = true;
-      powerManagement.finegrained = true;
-      dynamicBoost.enable = true;
-      nvidiaSettings = true;
-      
-      # We have access to 'config' here because of the lambda signature above
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
-
-      prime = {
-        offload.enable = true;
-        offload.enableOffloadCmd = true;
-        amdgpuBusId = "PCI:5:0:0";
-        nvidiaBusId = "PCI:1:0:0";
       };
     };
   };
