@@ -9,7 +9,6 @@
       # 1. Enable GDM (GNOME Display Manager)
       displayManager.gdm = {
         enable = true;
-        wayland = true;
       };
 
       # 2. Strip down all the bloatware (games, email, maps, etc.)
