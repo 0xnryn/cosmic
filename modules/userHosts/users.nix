@@ -40,7 +40,7 @@ in
       hashedPasswordFile = config.age.secrets."sudhauserpass".path;
     };
 
-    age.secrets."sudha-ssh" = {
+    age.secrets."sshsudha" = {
       file = ../../secrets/sshsudha.age;
       mode = "0600";
       owner = "sudha";
