@@ -1,6 +1,7 @@
 { ... }:
 {
-  flake.nixosModules.lenovoideapadgaming3-nvidia = { config, ... }: {
+  flake.nixosModules.sudhalaptop = { config, ... }: {
+    nixpkgs.config.allowUnfree = true;
     hardware.graphics.enable = true;
     hardware.graphics.enable32Bit = true;
 

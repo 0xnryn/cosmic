@@ -1,32 +1,17 @@
 { ... }:
 {
-  flake.nixosModules.lenovoideapadgaming3-config = { pkgs, config, inputs, ... }: {
-    
+  flake.nixosModules.system = { pkgs, config, inputs, ... }: {
+
     nix.settings = {
       experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
       trusted-users = [ "root" "sudha" ];
     };
-    
     programs.nix-ld.enable = true;
-    
     nixpkgs.config.allowUnfree = true;
-    system.stateVersion = "25.11";
-
-    boot = {
-      binfmt.emulatedSystems = [ "aarch64-linux" ];
-      kernelPackages = pkgs.linuxPackages_latest;
-      loader = {
-        systemd-boot.enable = true;
-        efi.canTouchEfiVariables = true;
-      };
-    };
-
-    hardware.bluetooth.enable = true;
-
+    system.stateVersion = "26.05";
     networking = {
       networkmanager.enable = true;
       firewall.enable = false;
-      hostName = "laptop";
     };
 
     time.timeZone = "Asia/Kolkata";
@@ -50,10 +35,6 @@
       };
     };
     
-    virtualisation.docker = {
-      enable = true;
-    };
-
     environment.systemPackages = with pkgs; [
       tree 
       util-linux 
@@ -70,7 +51,7 @@
       age
       ssh-to-age
       age-plugin-tpm
-      inputs.agenix.packages.${pkgs.system}.default
+      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 }

@@ -1,6 +1,6 @@
 { inputs, lib, ... }:
 {
-  flake.nixosModules.lenovoideapadgaming3-disko = { config, modulesPath, ... }: {
+  flake.nixosModules.sudhalaptop = { config, modulesPath, ... }: {
     # 1. DISKO LAYOUT (1GB EFI + LUKS Encrypted EXT4)
     disko.devices = {
       disk = {
