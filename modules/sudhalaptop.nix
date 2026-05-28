@@ -14,7 +14,7 @@
         sudha
       ];
     };
- 
+     
     configurations.home = {
       "sudha@laptop" = with config.flake.homeModules; mkUser "laptop" [
         sudhacli
