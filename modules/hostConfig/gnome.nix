@@ -29,6 +29,7 @@
     environment.systemPackages = with pkgs; [
       # Adding Tweaks as it is essentially mandatory for configuring 
       # a bare GNOME setup once you are logged in.
+      nautilus
       gnome-tweaks
       gnome-console
       # Useful Wayland utilities you already had in Plasma

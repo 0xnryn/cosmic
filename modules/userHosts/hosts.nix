@@ -9,7 +9,7 @@
         lenovoideapadgaming3-config
         lenovoideapadgaming3-disko
         lenovoideapadgaming3-nvidia
-        ollama_cuda
+        # ollama_cuda
         openwebui 
         gnome
         system-users
