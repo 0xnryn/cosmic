@@ -19,24 +19,6 @@
       owner = "sudha";
       path = "/home/sudha/.ssh/id_ed25519";
     };
-
-    virtualisation.vmVariant = {
-      # 1. Explicitly redefine the user so it doesn't get lost in the merge
-      users.users.sudha = {
-        isNormalUser = true;
-        extraGroups = [ "wheel" "dialout" "docker" ];
-        hashedPasswordFile = config.age.secrets."sudhauserpass".path;
-      };
-
-      # 2. Keep your SSH logic
-      virtualisation.sharedDirectories = {
-        host-ssh = {
-          source = "/home/sudha/.ssh";
-          target = "/mnt/host-ssh";
-        };
-      };
-      age.identityPaths = [ "/mnt/host-ssh/id_ed25519" ];
-    };
   };
 
   flake.homeModules.sudhacli = { pkgs, ... }:{
