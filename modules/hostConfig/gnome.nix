@@ -30,7 +30,7 @@
       # Adding Tweaks as it is essentially mandatory for configuring 
       # a bare GNOME setup once you are logged in.
       gnome-tweaks
-      
+      gnome-console
       # Useful Wayland utilities you already had in Plasma
       wayland-utils
       wl-clipboard

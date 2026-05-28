@@ -1,7 +1,5 @@
 { config, inputs, ... }:
 let
-  hm = config.flake.homeModules;
-
   mkUser = hostname: modules: {
     pkgs = inputs.nixpkgs.legacyPackages.${config.configurations.nixos.${hostname}.system};
     module = { imports = modules; };
@@ -9,60 +7,54 @@ let
 in
 {
   configurations.home = {
-    "sudha@laptop" = with hm; mkUser "laptop" [
+    "sudha@laptop" = with config.flake.homeModules; mkUser "laptop" [
       cli
       gui
       helix
       zen-browser
     ];
 
-    "sudha@server" = with hm; mkUser "server" [
+    "sudha@server" = with config.flake.homeModules; mkUser "server" [
       cli
       helix
     ];
   };
 
-  flake.nixosModules.system-users = { config, pkgs, ... }: {
-    
-    # ==========================================
-    # 1. THE AGENIX PASSWORD DECRYPTION
-    # ==========================================
-    # Unlike SOPS which uses one big YAML file, Agenix decrypts literal files.
-    # We point to the encrypted hashes in your secrets folder.
-
-    age.secrets."root-password" = {
-      file = ../../secrets/root-password.age;
+  flake.nixosModules.system-users = { config, pkgs, lib, ... }: {
+  
+    age.secrets."rootuserpass" = {
+      file = ../../secrets/rootuserpass.age;
     };
 
-    age.secrets."sudha-password" = {
-      file = ../../secrets/sudha-password.age;
+    age.secrets."sudhauserpass" = {
+      file = ../../secrets/sudhauserpass.age;
     };
 
-    # ==========================================
-    # 2. APPLYING PASSWORDS TO USERS
-    # ==========================================
-    
     users.users.root = {
-      # Points to the decrypted file sitting in /run/agenix/root-password
-      hashedPasswordFile = config.age.secrets."root-password".path;
+      hashedPasswordFile = config.age.secrets."rootuserpass".path;
     };
 
     users.users.sudha = {
       isNormalUser = true;
       extraGroups = [ "wheel" "dialout" "docker" ];
-      hashedPasswordFile = config.age.secrets."sudha-password".path;
+      hashedPasswordFile = config.age.secrets."sudhauserpass".path;
     };
 
-    # ==========================================
-    # 3. THE VM OVERRIDE
-    # ==========================================
-    # ONLY applies when running `nixos-rebuild build-vm`
+    age.secrets."sudha-ssh" = {
+      file = ../../secrets/sshsudha.age;
+      mode = "0600";
+      owner = "sudha";
+      path = "/home/sudha/.ssh/id_ed25519";
+    };
+
     virtualisation.vmVariant = {
       users.users.root.hashedPasswordFile = pkgs.lib.mkForce null;
       users.users.sudha.hashedPasswordFile = pkgs.lib.mkForce null;
       
       users.users.root.initialPassword = "root";
       users.users.sudha.initialPassword = "test";
+
+      systemd.services.agenix.enable = lib.mkForce false;
     };
   };
 }

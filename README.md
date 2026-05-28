@@ -62,3 +62,8 @@ ssh-keygen -t ed25519 -C ""
 
 
 nix run nixpkgs#mkpasswd -- -m sha-512
+
+
+sudo mkdir -p /mnt/etc/ssh
+sudo cp /path/to/thumbdrive/laptop_seed_key /mnt/etc/ssh/ssh_host_ed25519_key
+sudo chmod 600 /mnt/etc/ssh/ssh_host_ed25519_key
