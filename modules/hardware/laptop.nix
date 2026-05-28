@@ -1,6 +1,23 @@
 { inputs, lib, ... }:
 {
-  flake.nixosModules.sudhalaptop = { config, modulesPath, ... }: {
+  flake.nixosModules.laptop = { pkgs, config, modulesPath,... }: {
+    boot = {
+      binfmt.emulatedSystems = [ "aarch64-linux" ];
+      kernelPackages = pkgs.linuxPackages_latest;
+      loader = {
+        systemd-boot.enable = true;
+        efi.canTouchEfiVariables = true;
+      };
+    };
+
+    hardware.bluetooth.enable = true;
+
+    networking = {
+      networkmanager.enable = true;
+      firewall.enable = false;
+      hostName = "laptop";
+    };
+
     # 1. DISKO LAYOUT (1GB EFI + LUKS Encrypted EXT4)
     disko.devices = {
       disk = {
@@ -59,5 +76,35 @@
     # 3. PLATFORM IDENTITY
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+
+    hardware.graphics.enable = true;
+    hardware.graphics.enable32Bit = true;
+
+    boot.kernelParams = [
+      "nvidia.NVreg_PreserveVideoMemoryAllocations=0"
+    ];
+
+    # Load drivers for both AMD iGPU and NVIDIA dGPU
+    services.xserver.videoDrivers = [ "amdgpu" "nvidia" ];
+
+    hardware.nvidia = {
+      modesetting.enable = true;
+      open = true;
+      powerManagement.enable = true;
+      powerManagement.finegrained = true;
+      dynamicBoost.enable = true;
+      nvidiaSettings = true;
+      
+      # We have access to 'config' here because of the lambda signature above
+      package = config.boot.kernelPackages.nvidiaPackages.beta;
+
+      prime = {
+        offload.enable = true;
+        offload.enableOffloadCmd = true;
+        amdgpuBusId = "PCI:5:0:0";
+        nvidiaBusId = "PCI:1:0:0";
+      };
+    };
   };
 }
