@@ -1,8 +1,7 @@
 { inputs, lib, ... }:
 {
   flake.nixosModules.lenovoideapadgaming3-disko = { config, modulesPath, ... }: {
-    # 1. DISKO LAYOUT (1GB EFI + Remaining EXT4)
-    # This replaces the need for manual 'fileSystems' entries or UUIDs.
+    # 1. DISKO LAYOUT (1GB EFI + LUKS Encrypted EXT4)
     disko.devices = {
       disk = {
         main = {
@@ -25,9 +24,17 @@
               root = {
                 size = "100%";
                 content = {
-                  type = "filesystem";
-                  format = "ext4";
-                  mountpoint = "/";
+                  type = "luks";
+                  name = "crypted"; # The mapped name in /dev/mapper/crypted
+                  settings = {
+                    allowDiscards = true; # Crucial for NVMe SSD health (TRIM)
+                  };
+                  # The actual filesystem inside the LUKS container
+                  content = {
+                    type = "filesystem";
+                    format = "ext4";
+                    mountpoint = "/";
+                  };
                 };
               };
             };
@@ -37,7 +44,6 @@
     };
   
     # 2. CORE HARDWARE DRIVERS
-    # These ensure the kernel can actually talk to your NVMe and USB controllers.
     imports = [ 
       inputs.disko.nixosModules.disko
       (modulesPath + "/installer/scan/not-detected.nix") 
@@ -51,7 +57,6 @@
     boot.extraModulePackages = [ ];
   
     # 3. PLATFORM IDENTITY
-    # This defines the architecture without hardcoding machine-specific IDs.
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   };
