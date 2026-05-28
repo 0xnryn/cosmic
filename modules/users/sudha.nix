@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }:
+{ inputs, lib, config, builtins, ... }:
 {
 
   flake.nixosModules.sudha = { config, pkgs, lib, ... }: {

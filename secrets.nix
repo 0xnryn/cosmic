@@ -8,6 +8,5 @@ let
 in
 {
   "secrets/sshsudha.age".publicKeys = allKeys;
-  "secrets/rootuserpass.age".publicKeys = allKeys;
   "secrets/sudhauserpass.age".publicKeys = allKeys;
 }
