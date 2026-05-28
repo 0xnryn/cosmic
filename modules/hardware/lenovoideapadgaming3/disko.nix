@@ -25,7 +25,7 @@
                 size = "100%";
                 content = {
                   type = "luks";
-                  name = "crypted"; # The mapped name in /dev/mapper/crypted
+                  name = "enc"; # The mapped name in /dev/mapper/crypted
                   settings = {
                     allowDiscards = true; # Crucial for NVMe SSD health (TRIM)
                   };
