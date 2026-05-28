@@ -18,15 +18,15 @@ in
         gnome
         sudha
       ];
-    };
- 
-    configurations.home = {
-      "sudha@laptop" = with config.flake.homeModules; mkUser "laptop" [
-        sudhacli
-        sudhagui
-        helix
-        zen-browser
-      ];
-    };   
+    }; 
   };
+
+  configurations.home = {
+    "sudha@laptop" = with config.flake.homeModules; mkUser "laptop" [
+      sudhacli
+      sudhagui
+      helix
+      zen-browser
+    ];
+  };  
 }
