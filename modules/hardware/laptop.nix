@@ -15,6 +15,9 @@
     };
     
     boot = {
+  
+      initrd.systemd.enable = true;      
+      initrd.luks.devices."enc".crypttabExtraOpts = [ "tpm2-device=auto" ];
       binfmt.emulatedSystems = [ "aarch64-linux" ];
       kernelPackages = pkgs.linuxPackages_latest;
       loader = {
@@ -25,7 +28,7 @@
         "nvidia.NVreg_PreserveVideoMemoryAllocations=0"
       ];
       initrd.availableKernelModules = [ 
-        "nvme" "xhci_pci" "usb_storage" "usbhid" "sd_mod" 
+        "nvme" "xhci_pci" "usb_storage" "usbhid" "sd_mod" "tpm_crb" "tpm_tis" 
       ];
       initrd.kernelModules = [ ];
       kernelModules = [ "kvm-amd" ];
