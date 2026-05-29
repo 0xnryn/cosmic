@@ -12,12 +12,12 @@ in
       system = "x86_64-linux";
       module.imports = with config.flake.nixosModules; [ 
         inputs.agenix.nixosModules.default
-        laptop
-        system
-        ollama_cuda
-        openwebui 
-        gnome
+        server
         sudha
+        erpnext
+        minecraft
+        tailscale
+        filebrowser
       ];
     }; 
   };
