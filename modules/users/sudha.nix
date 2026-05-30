@@ -2,19 +2,19 @@
 {
     
   configurations.secrets.identities."root" = {
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIa15dUVh3/qB8D6QxE+0xkZen6217zqmnFF+gtraf34 root";
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMN0wYS/b/2p+LQHKYFRrpCZJz4do2wW9KqZdknssZNt root";
     tags = [ "root" ];
   };
 
   configurations.secrets.identities."sudha" = {
-    publicKey = "ssh-ed25519 sample";
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfAIq4S4j+4y8S+Kq/nNcp/3tOB0ZtzffaMSkodotGB sudha";
     tags = [ "sudha" ];
   };
 
   # Protect your personal secrets
   configurations.secrets.policies = {
-    "secrets/sudhauserpass.age".requiredTags = [ "root" "sudha" ];
-    "secrets/sudha.age".requiredTags = [ "root" "sudha" ];
+    "secrets/sudha/sudhauserpassword.age".requiredTags = [ "root" "sudha" ];
+    "secrets/sudha/sudha.age".requiredTags = [ "root" "sudha" ];
   };
 
   flake.nixosModules.sudha = { config, pkgs, lib, ... }: {
