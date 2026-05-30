@@ -1,5 +1,21 @@
 { inputs, lib, config, builtins, ... }:
 {
+    
+  configurations.secrets.identities."root" = {
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIa15dUVh3/qB8D6QxE+0xkZen6217zqmnFF+gtraf34 root";
+    tags = [ "root" ];
+  };
+
+  configurations.secrets.identities."sudha" = {
+    publicKey = "ssh-ed25519 sample";
+    tags = [ "sudha" ];
+  };
+
+  # Protect your personal secrets
+  configurations.secrets.policies = {
+    "secrets/sudhauserpass.age".requiredTags = [ "root" "sudha" ];
+    "secrets/sudha.age".requiredTags = [ "root" "sudha" ];
+  };
 
   flake.nixosModules.sudha = { config, pkgs, lib, ... }: {
     
@@ -17,6 +33,7 @@
       file = ../../secrets/sshsudha.age;
       mode = "0600";
       owner = "sudha";
+      path = "/home/sudha/.ssh/id_ed25519";
     };
   };
 

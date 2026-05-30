@@ -7,6 +7,17 @@ let
   };
 in
 {
+
+  configurations.secrets.identities."laptop" = {
+    publicKey = "ssh-ed25519 sample";
+    tags = [ "laptop" ]; # Because it's an admin, it will automatically get access to everything.
+  };
+  configurations.secrets.policies = {
+    "secrets/laptop.age" = {
+      scope = "sudhalaptop";
+      requiredTags = [ "root" "laptop" ];
+    };
+  };
   configurations.nixos = {
     "laptop" = {
       system = "x86_64-linux";
