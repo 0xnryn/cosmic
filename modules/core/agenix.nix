@@ -70,52 +70,46 @@
         |> builtins.map (id: id.publicKey);
     });
 
-  # ==========================================
-  # 4. THE SCOPED TAG COMPILER
-  # ==========================================
-  options.flake.agenixSecretsByTag = lib.mkOption {
-    type = lib.types.lazyAttrsOf lib.types.unspecified;
-    default = {};
-    description = "Agenix secrets filtered and isolated by specific identity tags.";
-  };
+    # ==========================================
+    # 4. THE SCOPED TAG COMPILER
+    # ==========================================
+    options.flake.agenixSecretsByTag = lib.mkOption {
+      type = lib.types.lazyAttrsOf lib.types.unspecified;
+      default = {};
+      description = "Agenix secrets filtered and isolated by specific identity tags.";
+    };
+    
+    config.flake.agenixSecretsByTag = let
+      # FIX: Scrape tags from BOTH policies and identities so unused tags are valid
+      policyTags = lib.flatten (lib.mapAttrsToList (path: policy: policy.requiredTags) config.configurations.secrets.policies);
+      identityTags = lib.flatten (lib.mapAttrsToList (name: id: id.tags) config.configurations.secrets.identities);
+      allTags = lib.unique (policyTags ++ identityTags);
+    in
+      lib.genAttrs allTags (tag:
+        config.configurations.secrets.policies
+        |> lib.filterAttrs (secretPath: policyDef: builtins.elem tag policyDef.requiredTags)
+        |> lib.mapAttrs (secretPath: policyDef: {
+          publicKeys = let
+            authorizedEntities = config.configurations.secrets.identities
+              |> lib.filterAttrs (name: idDef: (builtins.length (lib.intersectLists idDef.tags policyDef.requiredTags) > 0));
+          in
+            authorizedEntities |> lib.attrValues |> builtins.map (id: id.publicKey);
+        })
+      );
   
-  config.flake.agenixSecretsByTag = let
-    allTags = lib.unique (
-      lib.flatten (lib.mapAttrsToList (path: policy: policy.requiredTags) config.configurations.secrets.policies)
-    );
-  in
-    lib.genAttrs allTags (tag:
-      config.configurations.secrets.policies
-      |> lib.filterAttrs (secretPath: policyDef: builtins.elem tag policyDef.requiredTags)
-      |> lib.mapAttrs (secretPath: policyDef: {
-        publicKeys = let
-          authorizedEntities = config.configurations.secrets.identities
-            |> lib.filterAttrs (name: idDef: (builtins.length (lib.intersectLists idDef.tags policyDef.requiredTags) > 0));
-        in
-          authorizedEntities |> lib.attrValues |> builtins.map (id: id.publicKey);
-      })
-    );
-
   # ==========================================
   # 5. THE NATIVE FLAKE APP (agenix-tag)
   # ==========================================
-  # 
-  config.systems = [
-      "x86_64-linux"
-      "aarch64-linux"
-    ];
+  
   config.perSystem = { pkgs, system, ... }: {
     apps.agenix-tag = {
       type = "app";
       program = lib.getExe (pkgs.writeShellApplication {
         name = "agenix-tag";
-        # Added pkgs.git to runtimeInputs for the directory context fix
         runtimeInputs = [ inputs.agenix.packages.${system}.default pkgs.git ];
         text = ''
           TARGET_TAG=''${1:-}
 
-          # [FIX 2: Strict-Mode Crash] Check argument count ($#) before shifting
-          # to prevent 'set -u' from crashing on an unbound $1 variable.
           if [ "$#" -gt 0 ]; then shift; fi
 
           if [ -z "$TARGET_TAG" ]; then
@@ -123,8 +117,6 @@
               exec agenix --rekey "$@"
           fi
 
-          # [FIX 1: Code Injection] Sanitize the tag strictly to alphanumeric + hyphens.
-          # If an attacker tries to inject Nix code like 'laptop"; rm -rf /; "', it dies here.
           if [[ ! "$TARGET_TAG" =~ ^[a-zA-Z0-9_-]+$ ]]; then
               echo "[!] CRITICAL: Invalid tag format. Tags must be alphanumeric. Aborting."
               exit 1
@@ -132,19 +124,22 @@
 
           echo "[*] Targeted Rekey Initiated for Identity Tag: [$TARGET_TAG]"
           
-          # [FIX 3: Directory Context] Calculate absolute root dynamically using git.
-          # Allows you to run `nix run .#agenix-tag` from ANY subfolder in the project.
+          # Strictly enforces git auditability (will fail if not a git repo)
           REPO_ROOT=$(git rev-parse --show-toplevel)
 
-          # [FIX 4: State Leakage] Create the ephemeral file in the OS /tmp dir.
-          # If the user force-kills the script, the git working tree remains clean.
           TMPFILE=$(mktemp /tmp/agenix-tag-XXXXXX.nix)
           trap 'rm -f "$TMPFILE"' EXIT ERR INT TERM
 
-          # Inject variables directly into the Heredoc. $REPO_ROOT is passed as a string path.
+          # FIX: Graceful Error Handling for Typos via builtins.hasAttr
           cat > "$TMPFILE" <<EOF
-          let flake = builtins.getFlake "$REPO_ROOT";
-          in flake.outputs.agenixSecretsByTag."$TARGET_TAG"
+          let 
+            flake = builtins.getFlake "$REPO_ROOT";
+            tagMap = flake.outputs.agenixSecretsByTag;
+          in 
+            if builtins.hasAttr "$TARGET_TAG" tagMap then
+              tagMap."$TARGET_TAG"
+            else
+              builtins.abort "\n[!] ERROR: The tag '$TARGET_TAG' is not declared in any identity or policy.\n"
           EOF
 
           # Execute the compiled subset
