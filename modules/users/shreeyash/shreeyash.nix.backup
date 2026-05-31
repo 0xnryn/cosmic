@@ -1,10 +1,4 @@
-{ inputs, lib, config, builtins, ... }:
-{
-    
-  configurations.secrets.identities."root" = {
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMN0wYS/b/2p+LQHKYFRrpCZJz4do2wW9KqZdknssZNt root";
-    tags = [ "root" ];
-  };
+{ inputs, lib, config, ... }:{
 
   configurations.secrets.identities."sudha" = {
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfAIq4S4j+4y8S+Kq/nNcp/3tOB0ZtzffaMSkodotGB sudha";

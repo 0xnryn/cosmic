@@ -7,14 +7,13 @@ let
   };
 in
 {
-
   configurations.secrets.identities."laptop" = {
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAg0BNZUo8/LJiRcyPPKW+6cryfwWTMHRUfv3kXJrYd0 laptop";
     tags = [ "laptop" ]; # Because it's an admin, it will automatically get access to everything.
   };
+  
   configurations.secrets.policies = {
-    "secrets/laptop/laptop.age" = {
-      scope = "sudhalaptop";
+    "modules/machines/sudhalaptop/secrets/laptop.age" = {
       requiredTags = [ "root" "laptop" ];
     };
   };
@@ -30,6 +29,13 @@ in
         gnome
         sudha
       ];
+      
+      age.secrets."laptop" = {
+        file = secrets/laptop/laptop.age;
+        path = "/etc/ssh/ssh_host_ed25519_key"; 
+        mode = "0600";
+        owner = "root";
+      };
     }; 
   };
 

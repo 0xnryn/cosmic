@@ -10,7 +10,7 @@ nix run nixpkgs#mkpasswd -- -m sha-512
 
 ssh-keygen -t ed25519 -C "name" -f secrets/name
 
-ssh-agent bash -c 'ssh-add secrets/root && nix shell github:ryantm/agenix --command agenix -e secrets/new_secret_name.age'
+ssh-agent bash -c 'ssh-add secrets/root/ && nix shell github:ryantm/agenix --command agenix -e secrets/new_secret_name.age'
 
 
 
