@@ -29,7 +29,16 @@
       name: { system, module }: lib.nixosSystem { 
         inherit system;
         specialArgs = { inherit inputs; };
-        modules = [ module ]; 
+        modules = [ 
+          module
+          inputs.agenix.nixosModules.default
+          ({ pkgs, ... }: {
+            age.ageBin = "${pkgs.writeShellScriptBin "age-tpm" ''
+              export PATH="${pkgs.age-plugin-tpm}/bin:$PATH"
+              exec ${pkgs.age}/bin/age "$@"
+            ''}/bin/age-tpm";
+          }) 
+        ]; 
       }
     );
 
