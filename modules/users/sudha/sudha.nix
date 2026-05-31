@@ -5,34 +5,34 @@
     tags = [ "root" ];
   };
 
-  configurations.secrets.identities."sudha" = {
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEfAIq4S4j+4y8S+Kq/nNcp/3tOB0ZtzffaMSkodotGB sudha";
-    tags = [ "sudha" ];
+  configurations.secrets.identities."sudhassh" = {
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAPOVwS487rUg6zfTKdeRILuaF2MAkj+0Hb+VybiY/MK sudha";
+    tags = [ "sudhassh" ];
   };
 
   # Protect your personal secrets
   configurations.secrets.policies = {
-    "secrets/sudha/sudhauserpassword.age".requiredTags = [ "root" "sudha" ];
-    "secrets/sudha/sudha.age".requiredTags = [ "root" "sudha" ];
+    "modules/users/sudha/secrets/sudhassh.age".requiredTags = [ "root" "sudhalaptopssh" ];
+    "modules/users/sudha/secrets/sudhauserpass.age".requiredTags = [ "root" "sudhalaptopssh" "sudhassh" ];
   };
 
   flake.nixosModules.sudha = { config, pkgs, lib, ... }: {
     
+    age.secrets."sshsudha" = {
+      file = ./secrets/sudhassh.age;
+      mode = "0600";
+      owner = "sudha";
+      path = "/home/sudha/.ssh/id_ed25519";
+    };
+    
     age.secrets."sudhauserpass" = {
-      file = ../../secrets/sudhauserpass.age;
+      file = ./secrets/sudhauserpass.age;
     };
     
     users.users.sudha = {
       isNormalUser = true;
-      extraGroups = [ "wheel" "dialout" "docker" ];
+      extraGroups = [ "wheel" "dialout" ];
       hashedPasswordFile = config.age.secrets."sudhauserpass".path;
-    };
-
-    age.secrets."sshsudha" = {
-      file = ../../secrets/sshsudha.age;
-      mode = "0600";
-      owner = "sudha";
-      path = "/home/sudha/.ssh/id_ed25519";
     };
   };
 

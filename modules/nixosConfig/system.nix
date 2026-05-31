@@ -53,5 +53,9 @@
       age-plugin-tpm
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
+    age.ageBin = "${pkgs.writeShellScriptBin "age-tpm" ''
+        export PATH="${pkgs.age-plugin-tpm}/bin:$PATH"
+        exec ${pkgs.age}/bin/age "$@"
+    ''}/bin/age-tpm";
   };
 }

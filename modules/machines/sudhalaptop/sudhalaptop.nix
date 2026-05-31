@@ -7,35 +7,45 @@ let
   };
 in
 {
-  configurations.secrets.identities."laptop" = {
-    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAg0BNZUo8/LJiRcyPPKW+6cryfwWTMHRUfv3kXJrYd0 laptop";
-    tags = [ "laptop" ]; # Because it's an admin, it will automatically get access to everything.
+  configurations.secrets.identities."sudhalaptoptpm" = {
+    publicKey = "age1tag1qvyc9uwdu3d9jea3pdj53uak658zwe5mlfnk2gcc9acd0fu3s5hf5yf3e3k";
+    tags = [ "sudhalaptopssh" "sudhalaptoptpm" ]; 
+  };
+
+  configurations.secrets.identities."sudhalaptopssh" = {
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDOJRuZDBhEn9Q37C0qZ8jMo6EMrTe7bzTT4hKcBMBN9 sudhalaptop";
+    tags = [ "sudhalaptopssh" ]; 
   };
   
   configurations.secrets.policies = {
-    "modules/machines/sudhalaptop/secrets/laptop.age" = {
-      requiredTags = [ "root" "laptop" ];
+    "modules/machines/sudhalaptop/secrets/sudhalaptopssh.age" = {
+      requiredTags = [ "root" "sudhalaptoptpm" ];
     };
   };
+  
   configurations.nixos = {
     "laptop" = {
       system = "x86_64-linux";
-      module.imports = with config.flake.nixosModules; [ 
-        inputs.agenix.nixosModules.default
-        laptop
-        system
-        ollama_cuda
-        openwebui 
-        gnome
-        sudha
-      ];
-      
-      age.secrets."laptop" = {
-        file = secrets/laptop/laptop.age;
-        path = "/etc/ssh/ssh_host_ed25519_key"; 
-        mode = "0600";
-        owner = "root";
-      };
+      module = {
+        imports = with config.flake.nixosModules; [ 
+          inputs.agenix.nixosModules.default
+          laptop
+          system
+          ollama_cuda
+          openwebui 
+          gnome
+          sudha
+        ];
+        age.identityPaths = [ 
+          "/etc/sudhalaptoptpm"
+        ];
+        age.secrets."sudhalaptopssh" = {
+          file = ./secrets/sudhalaptopssh.age;
+          path = "/etc/ssh/ssh_host_ed25519_key"; 
+          mode = "0600";
+          owner = "root";
+        };
+      }; 
     }; 
   };
 
