@@ -34,6 +34,8 @@ in
           ollama_cuda
           openwebui 
           gnome
+          docker
+          # helm
           sudha
         ];
         age.identityPaths = [ 

@@ -15,6 +15,13 @@ ssh-agent bash -c 'ssh-add secrets/root/ && nix shell github:ryantm/agenix --com
 
 sudo age-plugin-tpm --generate -o /etc/laptoptpm
 
+
+
 sudo chmod 600 /etc/laptoptpm
 sudo chown root:root /etc/laptoptpm
 
+sudo nix run nixpkgs#sbctl -- status
+
+sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/nvme0n1p2
+
+sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 --tpm2-with-pin=yes /dev/nvme0n1p2

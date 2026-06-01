@@ -6,7 +6,9 @@
       experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
       trusted-users = [ "root" "sudha" ];
     };
-    programs.nix-ld.enable = true;
+    programs.nix-ld = {
+      enable = true;
+    };
     nixpkgs.config.allowUnfree = true;
     system.stateVersion = "26.05";
     networking = {
@@ -51,6 +53,7 @@
       age
       ssh-to-age
       age-plugin-tpm
+      sbctl
       inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
