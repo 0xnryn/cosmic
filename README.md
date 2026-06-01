@@ -1,92 +1,113 @@
-# NixOS Dendritic
+# NIXOS // DENDRITIC
 
-**NixOS Dendritic** is a highly modular, declarative, and cryptographically hardened Infrastructure-as-Code (IaC) repository. It manages a multi-node fleet using Nix Flakes, emphasizing Zero-Touch Provisioning (ZTP), hardware-bound secret management, and deterministic builds.
+Forget fragile dotfiles and manual setups. Dendritic is a mathematically sealed, zero-touch provisioning engine designed to manage a multi-node fleet.
 
-## System Architecture
+We don't write boilerplate here. We use `import-tree` to automatically traverse the `modules/` directory, treating infrastructure as a dynamically evaluated dependency graph. You define the hardware, assert the cryptographic perimeter, and the flake compiles the rest.
 
-This repository manages the following target hosts:
+---
 
-* **`laptop` (Mobile Workstation):** A cryptographically sealed workstation featuring UEFI Secure Boot (`lanzaboote`), TPM2-backed LUKS full-disk encryption bound to PCR 7, and hybrid graphics management (AMD iGPU + NVIDIA dGPU offloading). Heavily utilizes Wayland, GNOME/Plasma, and local AI (Ollama + OpenWebUI).
-* **`server` (Headless Services Node):** A legacy-hardware server (BIOS/GRUB) utilizing headless remote provisioning. It hosts robust containerized workloads including a full ERPNext stack, Cloudflared Zero-Trust tunnels, and Tailscale networking.
+## ⚙️ The Core Engine
 
-## Repository Structure
+The foundational logic lives in `modules/core/`. These aren't just config files; they are compiler macros that abstract away the raw Flake outputs.
 
-The flake utilizes `import-tree` to automatically evaluate and compose the system from isolated modules.
+* **The OS Compiler (`core/nixos.nix`):** Wraps standard `nixosConfigurations`. It lets you define architecture (`system = "x86_64-linux"`) natively and transparently injects Agenix binaries to support TPM2 decryption right at the bootloader level.
+* **The User Space Injector (`core/home.nix`):** Abstracts `homeConfigurations`. Crucially, this macro catches the evaluated OS configuration and forces it down into the Home Manager scope (`extraSpecialArgs = { inherit osConfig; }`). This means your local user environments can dynamically read system-level hardware secrets without hardcoding paths.
 
-```text
-nixos-dendritic/
-├── flake.nix                 # Central manifest and input definitions
-├── secrets.nix               # Global cryptographic public key ledger
-└── modules/
-    ├── core/                 # Custom module orchestrators (Agenix, Home Manager, NixOS macros)
-    ├── hardware/             # Bare-metal configurations, kernel modules, and Disko drive layouts
-    ├── machines/             # High-level host definitions binding profiles together
-    ├── nixosConfig/          # System-level services (Docker, Tailscale, Cloudflared, ERPNext)
-    ├── homeConfig/           # User-level application configs (Helix, Zen Browser)
-    └── users/                # User identities, groups, and SSH/Age configurations
+---
 
-```
+## 🖥️ Wiring a Node
 
-## Cryptography & Secret Management
+You construct a machine by snapping modules together under the `configurations` namespace.
 
-This repository employs a **Dual-Layer Secret Architecture** to ensure secrets never leak into the world-readable `/nix/store` or GitHub.
+Here is exactly how you spin up a new rig (e.g., `modules/machines/workstation.nix`):
 
-1. **System Identity (Agenix):** Used for core system secrets (user passwords, SSH private keys). Features a custom `agenix.nix` compiler that routes secrets based on declarative hardware `tags` (e.g., `sudhalaptoptpm`), allowing targeted re-keying via a custom `agenix-tag` flake app.
-2. **Application Environments (sops-nix):** Used for service-level credentials (e.g., ERPNext `.env` files, Cloudflared tunnel tokens). Decryption is bound to the server's specific hardware SSH host key.
+```nix
+{ config, inputs, ... }:
+let
+  # The scaffold function that bridges NixOS and Home Manager
+  mkUser = hostname: modules: {
+    pkgs = inputs.nixpkgs.legacyPackages.${config.configurations.nixos.${hostname}.system};
+    module = { imports = modules; };
+    osConfig = config.flake.nixosConfigurations.${hostname}.config;
+  };
+in
+{
+  # 1. Forge the Metal (OS Level)
+  configurations.nixos = {
+    "workstation" = {
+      system = "x86_64-linux";
+      module = {
+        imports = with config.flake.nixosModules; [ 
+          inputs.agenix.nixosModules.default
+          hardware-profile-x     # Drive layout, TPM bindings
+          system-defaults        # Networking, timezone
+          desktop-environment    # Wayland, Plasma
+        ];
+        
+        # Lock the node to its specific physical identity
+        age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+      }; 
+    }; 
+  };
 
-## Zero-Touch Provisioning (Bootstrapping)
-
-Systems can be provisioned from bare-metal to a fully encrypted, fully configured state using a single command sequence via `disko`.
-
-**1. Boot from a NixOS Live USB and elevate to root:**
-
-```bash
-sudo -i
-
-```
-
-**2. Partition, encrypt, and format the drive natively from GitHub:**
-
-```bash
-nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko github:your-username/nixos-dendritic#<target-host>
-
-```
-
-**3. Install the OS:**
-
-```bash
-nixos-install --flake github:your-username/nixos-dendritic#<target-host>
-
-```
-
-## Daily Operations
-
-**Rebuild the local system:**
-
-```bash
-sudo nixos-rebuild switch --flake .#<target-host>
+  # 2. Project the User Space (Home Manager Level)
+  configurations.home = {
+    "admin@workstation" = with config.flake.homeModules; mkUser "workstation" [
+      cli-environment
+      gui-applications
+      editor-configs
+    ];
+  };  
+}
 
 ```
 
-**Deploy remotely to the server:**
+---
 
-```bash
-nixos-rebuild switch --flake .#server --target-host sudha@server --use-remote-sudo
+## 🔐 Cryptographic RBAC (The Vault)
+
+Standard `agenix` setups break down at scale because you have to manually maintain lists of SSH keys for every single secret.
+
+We engineered a **Role-Based Access Control (RBAC) Compiler** directly into the flake (`core/agenix.nix`). It routes secrets mathematically using associative **Tags**.
+
+### 1. The Actors (Identities)
+
+You register physical hardware nodes and human admins by assigning them capability tags (like `admin` or `database-node`).
+
+```nix
+configurations.secrets.identities."admin-laptop" = {
+  publicKey = "ssh-ed25519 AAAAC3Nz...";
+  tags = [ "global-admin" "developer" ];
+};
 
 ```
 
-**Update User Space (Home Manager):**
+### 2. The Perimeter (Policies)
 
-```bash
-home-manager switch --flake .#<user>@<target-host>
+Instead of assigning public keys to a file, you map required tags to a secret path. During evaluation, the flake intersects the identities and policies to generate the final cryptographic ledger.
+
+```nix
+configurations.secrets.policies = {
+  "secrets/api-keys.age".requiredTags = [ "global-admin" "web-server" ];
+};
 
 ```
 
-**Rekey Secrets after adding a new hardware identity:**
+*Result: If an identity possesses `global-admin` OR `web-server`, it gains decryption clearance.*
+
+### 3. Surgical Rekeying (`agenix-tag`)
+
+If you add a new server to the fleet, you don't want to rekey the entire repository (which would require every admin's physical hardware key).
+
+The core framework exposes a custom native app called `agenix-tag`. It compiles an isolated subset of the secret matrix based on the tag you target, allowing you to rekey surgically without touching unrelated secrets.
+
+**Execution:**
 
 ```bash
-nix run .#agenix-tag -- <tag-name> # Targeted rekey
-# or 
-nix run github:ryantm/agenix -- --rekey # Global rekey
+# Global Rekey (Requires all keys)
+nix run .#agenix-tag
+
+# Surgical Rekey (Only touches secrets bound to the 'web-server' tag)
+nix run .#agenix-tag -- web-server
 
 ```
