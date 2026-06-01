@@ -6,7 +6,7 @@ We don't write boilerplate here. We use `import-tree` to automatically traverse 
 
 ---
 
-## ⚙️ The Core Engine
+## The Core Engine
 
 The foundational logic lives in `modules/core/`. These aren't just config files; they are compiler macros that abstract away the raw Flake outputs.
 
@@ -15,7 +15,7 @@ The foundational logic lives in `modules/core/`. These aren't just config files;
 
 ---
 
-## 🖥️ Wiring a Node
+## Wiring a Node
 
 You construct a machine by snapping modules together under the `configurations` namespace.
 
@@ -64,7 +64,7 @@ in
 
 ---
 
-## 🔐 Cryptographic RBAC (The Vault)
+## Cryptographic RBAC (The Vault)
 
 Standard `agenix` setups break down at scale because you have to manually maintain lists of SSH keys for every single secret.
 
