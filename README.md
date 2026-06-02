@@ -1,3 +1,4 @@
+```markdown
 ```nix
 {
   project = "COS: MIC";
@@ -11,7 +12,8 @@
     '';
     author = "Frank Herbert - Dune";
   };
-
-  action = "[ Initiate Boot Sequence ](./docs/README.md)";
 }
+
 ```
+
+[`>_ INITIATE BOOT SEQUENCE`](./docs/)
