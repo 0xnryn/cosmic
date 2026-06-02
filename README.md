@@ -13,4 +13,4 @@
   };
 }
 ```
-[`>_ INITIATE BOOT SEQUENCE`](./docs/)
+[`BE THE ONE WITH THE MACHINE`](./docs/README.md) || [`TRUST OTHER MEN WITH MACHINES`](https://github.com/)
