@@ -13,4 +13,4 @@
   };
 }
 ```
-[`BE THE ONE WITH THE MACHINE`](./docs/README.md) || [`TRUST OTHER MEN WITH MACHINES`](https://github.com/)
+[`BE THE ONE WITH THE MACHINE`](./docs/) || [`TRUST OTHER MEN WITH MACHINES`](https://github.com/)
