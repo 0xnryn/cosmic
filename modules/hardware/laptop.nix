@@ -37,9 +37,7 @@
       lanzaboote = {
         enable = true;
         pkiBundle = "/etc/secureboot";
-        # Automatically generate keys if they are missing
         autoGenerateKeys.enable = true; 
-        # Safely provision the system
         autoEnrollKeys = {
           enable = true;
         };

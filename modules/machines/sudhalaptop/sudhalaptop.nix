@@ -27,17 +27,6 @@ in
     "laptop" = {
       system = "x86_64-linux";
       module = {
-        imports = with config.flake.nixosModules; [ 
-          inputs.agenix.nixosModules.default
-          laptop
-          system
-          ollama_cuda
-          openwebui 
-          gnome
-          docker
-          # helm
-          sudha
-        ];
         age.identityPaths = [ 
           "/etc/sudhalaptoptpm"
         ];
@@ -47,6 +36,16 @@ in
           mode = "0600";
           owner = "root";
         };
+        imports = with config.flake.nixosModules; [ 
+          inputs.agenix.nixosModules.default
+          laptop
+          system
+          ollama_cuda
+          openwebui 
+          gnome
+          docker
+          sudha
+        ];
       }; 
     }; 
   };
