@@ -189,7 +189,3 @@ sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/<encrypted-partition>
 sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 --tpm2-with-pin=yes /dev/<encrypted-partition>
 
 ```
-
----
-
-To ensure I haven't made any structural assumptions that conflict with your vision, would you prefer these commands stay bundled together in this "Operational Runbook" section at the bottom, or would you rather I weave them into the specific architectural sections above (e.g., putting the TPM commands directly under the "Cryptographic RBAC" heading)?
