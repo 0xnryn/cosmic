@@ -11,5 +11,7 @@
     '';
     author = "Frank Herbert - Dune";
   };
+
+  action = "[ Initiate Boot Sequence ](./docs/README.md)";
 }
 ```
