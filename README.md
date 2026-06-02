@@ -1,4 +1,3 @@
-```markdown
 ```nix
 {
   project = "COS: MIC";
@@ -13,7 +12,5 @@
     author = "Frank Herbert - Dune";
   };
 }
-
 ```
-
 [`>_ INITIATE BOOT SEQUENCE`](./docs/)
