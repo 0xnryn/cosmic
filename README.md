@@ -2,7 +2,7 @@
 {
   project = "COS: MIC";
   
-  description = "Civilization Operating System: Mesh Infrastructure Core";
+  description = "Cosmic Operating System: Mesh Infrastructure Core";
 
   philosophy = {
     quote = ''
