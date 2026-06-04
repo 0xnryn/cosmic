@@ -80,22 +80,21 @@
     };
     
     config.flake.agenixSecretsByTag = let
-      # FIX: Scrape tags from BOTH policies and identities so unused tags are valid
       policyTags = lib.flatten (lib.mapAttrsToList (path: policy: policy.requiredTags) config.configurations.secrets.policies);
       identityTags = lib.flatten (lib.mapAttrsToList (name: id: id.tags) config.configurations.secrets.identities);
       allTags = lib.unique (policyTags ++ identityTags);
     in
-      lib.genAttrs allTags (tag:
-        config.configurations.secrets.policies
-        |> lib.filterAttrs (secretPath: policyDef: builtins.elem tag policyDef.requiredTags)
-        |> lib.mapAttrs (secretPath: policyDef: {
-          publicKeys = let
-            authorizedEntities = config.configurations.secrets.identities
-              |> lib.filterAttrs (name: idDef: (builtins.length (lib.intersectLists idDef.tags policyDef.requiredTags) > 0));
-          in
-            authorizedEntities |> lib.attrValues |> builtins.map (id: id.publicKey);
-        })
-      );
+    lib.genAttrs allTags (tag:
+      config.configurations.secrets.policies
+      |> lib.filterAttrs (secretPath: policyDef: builtins.elem tag policyDef.requiredTags)
+      |> lib.mapAttrs (secretPath: policyDef: {
+        publicKeys = let
+          authorizedEntities = config.configurations.secrets.identities
+            |> lib.filterAttrs (name: idDef: (builtins.length (lib.intersectLists idDef.tags policyDef.requiredTags) > 0));
+        in
+          authorizedEntities |> lib.attrValues |> builtins.map (id: id.publicKey);
+      })
+    );
   
   # ==========================================
   # 5. THE NATIVE FLAKE APP (agenix-tag)

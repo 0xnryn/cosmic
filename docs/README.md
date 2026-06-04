@@ -1,5 +1,5 @@
 # COS:MIC 
-# Civilization Operating System: Mesh Infrastructure Core
+# Cosmic Operating System: Mesh Infrastructure Core
 
 Forget fragile dotfiles and manual setups. Dendritic is a mathematically sealed, zero-touch provisioning engine designed to manage a multi-node fleet.
 

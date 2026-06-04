@@ -15,9 +15,6 @@ in
         server
         sudha
         erpnext
-        minecraft
-        tailscale
-        filebrowser
       ];
     }; 
   };

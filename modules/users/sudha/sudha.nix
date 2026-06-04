@@ -40,7 +40,7 @@
     nixpkgs.config.allowUnfree = true;
     home.username = "sudha";
     home.homeDirectory = "/home/sudha";
-    home.stateVersion = "25.11";
+    home.stateVersion = "26.05";
     programs.home-manager.enable = true;
     home.packages = with pkgs; [
       tree
@@ -108,6 +108,8 @@
       discord
       jdk25
       orca-slicer
+      obs-studio
+      pavucontrol
     ];
   };
 }

@@ -31,6 +31,7 @@
       nautilus
       gnome-tweaks
       gnome-console
+      impression
       # Useful Wayland utilities you already had in Plasma
       wayland-utils
       wl-clipboard
