@@ -1,4 +1,4 @@
-{ config, inputs, ... }:
+{ pkgs, config, inputs, ... }:
 let
   mkUser = hostname: modules: {
     pkgs = inputs.nixpkgs.legacyPackages.${config.configurations.nixos.${hostname}.system};
@@ -42,9 +42,11 @@ in
           system
           ollama_cuda
           openwebui 
-          gnome
           docker
           sudha
+          greetd
+          tuigreet
+          niri
         ];
       }; 
     }; 
@@ -56,6 +58,8 @@ in
       sudhagui
       helix
       zen-browser
+      niri
+      noctalia
     ];
   };  
 }

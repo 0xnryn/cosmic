@@ -96,6 +96,11 @@
   
   flake.homeModules.sudhagui = { pkgs, ... }:{
     home.packages = with pkgs; [
+      nautilus       # Modern GTK4 File Manager
+      sushi          # File previewer (press Spacebar in Nautilus)
+      loupe          # Hardware-accelerated Wayland image viewer
+      evince         # Fast, minimal PDF reader
+      baobab         # Beautiful disk usage analyzer
       telegram-desktop
       steam-run
       prusa-slicer
@@ -111,5 +116,7 @@
       obs-studio
       pavucontrol
     ];
+
+    
   };
 }
