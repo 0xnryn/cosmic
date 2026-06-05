@@ -4,9 +4,6 @@
 
 { inputs, lib, config, ... }:{
   options.configurations.secrets = {
-    # ==========================================
-    # 1. THE IDENTITIES (Hardware & Humans)
-    # ==========================================
     identities = lib.mkOption {
       type = lib.types.attrsOf (
         lib.types.submodule {
