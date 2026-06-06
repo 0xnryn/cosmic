@@ -20,7 +20,6 @@
     imports = [
       (inputs.import-tree ./core)
     ];
-
     flake.flakeModules.default = inputs.import-tree ./core;
   };
 }
