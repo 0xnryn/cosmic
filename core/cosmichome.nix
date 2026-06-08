@@ -1,7 +1,3 @@
-# Provides an option for declaring Home Manager configurations.
-# These configurations end up as flake outputs under `#homeConfigurations."<name>"`.
-# A check for the activation package of each configuration also ends
-# under `#checks.<system>."configurations:home:<name>"`.
 { lib, config, inputs, ... }:
 {
   options.flake.homeModules = lib.mkOption {
@@ -14,12 +10,10 @@
     type = lib.types.lazyAttrsOf (
       lib.types.submodule {
         options = {
-          # 1. We ONLY ask for the target NixOS host name
           hostName = lib.mkOption {
             type = lib.types.str;
             description = "The NixOS host this user configuration belongs to.";
           };
-          # 2. And the list of Home Manager "bricks" (modules) to install
           modules = lib.mkOption {
             type = lib.types.listOf lib.types.deferredModule;
             default = [];
@@ -31,40 +25,34 @@
   };
 
   config.flake = {
-    homeConfigurations = lib.mapAttrs (name: hmConfig: 
+    homeConfigurations = lib.mapAttrs (name: hmCfg: 
       let
-        # THE MAGIC: Cross-reference the NixOS tree to find the host's details
-        hostSystem = config.configurations.nixos.${hmConfig.hostName}.system;
+        # 1. Dynamically lookup the target system (e.g., x86_64-linux)
+        targetSystem = config.configurations.nixos.${hmCfg.hostName}.system;
         
-        # Instantiate the correct packages for that specific architecture
-        nixpkgsInstance = inputs.nixpkgs.legacyPackages.${hostSystem};
+        # 2. Grab the correct pkgs instance
+        targetPkgs = inputs.nixpkgs.legacyPackages.${targetSystem};
         
-        # Fetch the fully evaluated OS config for that specific host
-        fetchedOsConfig = config.flake.nixosConfigurations.${hmConfig.hostName}.config;
+        # 3. Grab the evaluated OS config for dependency injection
+        targetOsConfig = config.flake.nixosConfigurations.${hmCfg.hostName}.config;
       in
       inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgsInstance;
+        pkgs = targetPkgs;
         
-        # Inject the OS config and flake inputs globally into Home Manager
+        # IDENTICAL TO YOUR OLD mkUser: We wrap your list inside an imports block!
+        modules = [ { imports = hmCfg.modules; } ];
+        
         extraSpecialArgs = { 
-          osConfig = fetchedOsConfig; 
-          inputs = inputs; 
+          osConfig = targetOsConfig; 
+          inherit inputs; 
         };
-        
-        # Pass the list of requested modules
-        modules = hmConfig.modules;
       }
     ) config.configurations.home;
 
-    checks =
-      config.flake.homeConfigurations
-      |> lib.mapAttrsToList (
-        name: hm: {
-          ${hm.pkgs.stdenv.hostPlatform.system} = {
-            "configurations:home:${name}" = hm.activationPackage;
-          };
-        }
-      )
+    checks = config.flake.homeConfigurations
+      |> lib.mapAttrsToList (name: hm: {
+        ${hm.pkgs.stdenv.hostPlatform.system}."configurations:home:${name}" = hm.activationPackage;
+      })
       |> lib.mkMerge;
   };
 }
