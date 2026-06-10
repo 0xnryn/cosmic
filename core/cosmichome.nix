@@ -22,9 +22,12 @@
         };
       }
     );
+    default = {}; # Explicitly define an empty default
   };
 
-  config.flake = {
+  # ONLY generate the output if configurations.home is NOT empty!
+  config.flake = lib.mkIf (config.configurations.home != {}) {
+    
     homeConfigurations = lib.mapAttrs (name: hmCfg: 
       let
         # 1. Dynamically lookup the target system (e.g., x86_64-linux)
@@ -34,12 +37,12 @@
         targetPkgs = inputs.nixpkgs.legacyPackages.${targetSystem};
         
         # 3. Grab the evaluated OS config for dependency injection
+        # NOTE: This will error out in a standalone user flake because configurations.nixos is empty!
         targetOsConfig = config.flake.nixosConfigurations.${hmCfg.hostName}.config;
       in
       inputs.home-manager.lib.homeManagerConfiguration {
         pkgs = targetPkgs;
         
-        # IDENTICAL TO YOUR OLD mkUser: We wrap your list inside an imports block!
         modules = [ { imports = hmCfg.modules; } ];
         
         extraSpecialArgs = { 
