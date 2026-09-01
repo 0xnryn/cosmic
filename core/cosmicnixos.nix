@@ -24,7 +24,7 @@
   };
   config.flake = {
     nixosConfigurations = lib.flip lib.mapAttrs config.configurations.nixos (
-      name: { system, module }: lib.nixosSystem { 
+      name: { system, module }: inputs.nixpkgs.lib.nixosSystem { 
         inherit system;
         specialArgs = { inherit inputs; };
         modules = [ module ]; 
